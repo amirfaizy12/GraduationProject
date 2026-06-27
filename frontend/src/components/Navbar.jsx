@@ -12,28 +12,67 @@ export default function Navbar() {
     setLoggingOut(true);
     try {
       await api.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch {
+      // Proceed with client-side logout even if the request fails
     } finally {
       setUser(null);
       navigate("/login");
     }
   };
 
+  // Derive initials for the avatar
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "U";
+
   return (
-    <nav>
+    <nav className="navbar">
+      <Link to={user ? "/dashboard" : "/"} className="navbar-brand">
+        <div className="navbar-dot">✦</div>
+        <span className="navbar-name">Portify</span>
+      </Link>
+
       {user ? (
-        <>
-          <span>Welcome, {user?.name || "User"}</span>
-          <button onClick={handleLogout} disabled={loggingOut}>
-            {loggingOut ? "Logging out..." : "Logout"}
+        <div className="navbar-user">
+          <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
+            {user.name || user.email}
+          </span>
+          <div className="navbar-avatar" title={user.name}>
+            {initials}
+          </div>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? (
+              <>
+                <span className="spinner" style={{ width: 14, height: 14 }} />{" "}
+                Logging out
+              </>
+            ) : (
+              "Log out"
+            )}
           </button>
-        </>
+        </div>
       ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link to="/login" className="btn btn-ghost btn-sm">
+            Log in
+          </Link>
+          <Link
+            to="/register"
+            className="btn btn-primary btn-sm"
+            style={{ width: "auto" }}
+          >
+            Sign up
+          </Link>
+        </div>
       )}
     </nav>
   );

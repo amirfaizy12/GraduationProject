@@ -1,220 +1,269 @@
-import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import { useState, useEffect, useMemo } from "react";
+import api from "../api/axios";
+import PersonalInfoSection from "../components/editor/PersonalInfoSection";
+import PhotoUploadSection from "../components/editor/PhotoUploadSection";
+import CVUploadSection from "../components/editor/CVUploadSection";
+import ProjectsSection from "../components/editor/ProjectsSection";
+import SkillsSection from "../components/editor/SkillsSection";
 
+// ─── Autosave badge ───────────────────────────────────────────────────────────
+function AutosaveBadge({ status }) {
+  if (!status) return null;
+  const map = {
+    saving: { label: "Saving…", cls: "saving", icon: "⏳" },
+    saved: { label: "All saved", cls: "saved", icon: "✓" },
+    error: { label: "Save failed", cls: "error", icon: "⚠" },
+  };
+  const { label, cls, icon } = map[status] || {};
+  return (
+    <span className={`editor-autosave ${cls}`}>
+      {icon} {label}
+    </span>
+  );
+}
+
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+function ProgressBar({ form }) {
+  const pct = useMemo(() => {
+    let score = 0;
+    if (form.personalInfo.fullName.trim()) score += 20;
+    if (form.personalInfo.title.trim()) score += 15;
+    if (form.personalInfo.bio.trim()) score += 15;
+    if (form.personalInfo.photo) score += 20;
+    if (form.personalInfo.cvFilename) score += 10;
+    if (form.projects.length > 0) score += 10;
+    if (form.skills.filter((s) => s.trim()).length > 0) score += 10;
+    return Math.min(score, 100);
+  }, [form]);
+
+  return (
+    <div className="editor-progress">
+      <div className="editor-progress-label">
+        <span>Profile completion</span>
+        <span className="editor-progress-pct">{pct}%</span>
+      </div>
+      <div className="editor-progress-track">
+        <div className="editor-progress-fill" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function PortfolioEditor() {
   const [portfolioId, setPortfolioId] = useState(null);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [uploading, setUploading] = useState({ photo: false, cv: false });
+
   const [form, setForm] = useState({
     personalInfo: {
-      fullName: '',
-      title: '',
-      bio: '',
-      cvFilename: '',
-      photo: '',
+      fullName: "",
+      title: "",
+      bio: "",
+      cvFilename: "",
+      photo: "",
     },
     projects: [],
     skills: [],
   });
 
-  // ─── Load or Create Portfolio on Mount ───
+  // ─── Load or create portfolio ──────────────────────────────────────────────
   useEffect(() => {
-    const loadPortfolio = async () => {
+    const load = async () => {
       try {
-        const res = await api.get('/portfolio/mine');
+        const res = await api.get("/portfolio/mine");
         setForm(res.data);
         setPortfolioId(res.data.id);
       } catch {
-        const res = await api.post('/portfolio');
+        const res = await api.post("/portfolio");
         setPortfolioId(res.data.id);
       } finally {
         setLoading(false);
-        setIsLoaded(true); //  autosave won't fire until data is fully loaded
+        setIsLoaded(true);
       }
     };
-    loadPortfolio();
+    load();
   }, []);
 
-  // ─── Autosave (debounce 1.5s) ───
+  // ─── Autosave ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!isLoaded || !portfolioId) return; //  skip if not loaded yet
-
+    if (!isLoaded || !portfolioId) return;
     const timer = setTimeout(async () => {
-      setStatus('saving');
+      setStatus("saving");
       try {
         await api.put(`/portfolio/${portfolioId}`, form);
-        setStatus('saved');
+        setStatus("saved");
       } catch {
-        setStatus('error');
+        setStatus("error");
       }
     }, 1500);
-
     return () => clearTimeout(timer);
   }, [form, portfolioId, isLoaded]);
 
-  // ─── Personal Info Handler ───
-  const handlePersonalInfo = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      personalInfo: { ...prev.personalInfo, [e.target.name]: e.target.value },
+  // ─── Handlers ─────────────────────────────────────────────────────────────
+  const handlePersonalInfo = (e) =>
+    setForm((p) => ({
+      ...p,
+      personalInfo: { ...p.personalInfo, [e.target.name]: e.target.value },
     }));
-  };
 
-  // ─── Projects Handlers ───
-  const handleAddProject = () => {
-    setForm((prev) => ({
-      ...prev,
-      projects: [...prev.projects, { title: '', description: '', tags: [] }],
+  const handleAddProject = () =>
+    setForm((p) => ({
+      ...p,
+      projects: [...p.projects, { title: "", description: "", tags: [] }],
     }));
-  };
 
-  const handleProjectChange = (index, e) => {
-    setForm((prev) => ({
-      ...prev,
-      projects: prev.projects.map((project, i) =>
-        i === index
-          ? { ...project, [e.target.name]: e.target.value }
-          : project //  immutable update
+  const handleProjectChange = (i, e) =>
+    setForm((p) => ({
+      ...p,
+      projects: p.projects.map((proj, idx) =>
+        idx === i ? { ...proj, [e.target.name]: e.target.value } : proj,
       ),
     }));
+
+  const handleRemoveProject = (i) =>
+    setForm((p) => ({
+      ...p,
+      projects: p.projects.filter((_, idx) => idx !== i),
+    }));
+
+  const handleSkillsChange = (arr) => setForm((p) => ({ ...p, skills: arr }));
+
+  // Photo
+  const handlePhotoUploadStart = () => {
+    setUploading((p) => ({ ...p, photo: true }));
+    setUploadError("");
+  };
+  const handlePhotoUploadDone = (url) => {
+    setUploading((p) => ({ ...p, photo: false }));
+    setForm((p) => ({ ...p, personalInfo: { ...p.personalInfo, photo: url } }));
+  };
+  const handlePhotoUploadError = (msg) => {
+    setUploading((p) => ({ ...p, photo: false }));
+    setUploadError(msg);
   };
 
-  const handleRemoveProject = (index) => {
-    setForm((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((_, i) => i !== index),
+  // CV
+  const handleCVUploadStart = () => {
+    setUploading((p) => ({ ...p, cv: true }));
+    setUploadError("");
+  };
+  const handleCVUploadDone = (filename) => {
+    setUploading((p) => ({ ...p, cv: false }));
+    setForm((p) => ({
+      ...p,
+      personalInfo: { ...p.personalInfo, cvFilename: filename },
     }));
   };
-
-  // ─── Skills Handler ───
-  const handleSkillsChange = (e) => {
-    const skillsArray = e.target.value.split(',').map((s) => s.trim());
-    setForm((prev) => ({ ...prev, skills: skillsArray }));
+  const handleCVUploadError = (msg) => {
+    setUploading((p) => ({ ...p, cv: false }));
+    setUploadError(msg);
   };
 
-  // ─── Photo Upload ───
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
-      return;
-    }
-
-    setUploading((prev) => ({ ...prev, photo: true }));
-    try {
-      const data = new FormData();
-      data.append('file', file);
-      const res = await api.post('/upload', data);
-      setForm((prev) => ({
-        ...prev,
-        personalInfo: { ...prev.personalInfo, photo: res.data.url },
-      }));
-    } catch {
-      alert('Photo upload failed, please try again');
-    } finally {
-      setUploading((prev) => ({ ...prev, photo: false }));
-    }
-  };
-
-  // ─── CV Upload ───
-  const handleCVUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.type !== 'application/pdf') {
-      alert('CV must be a PDF file');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('CV size must be less than 5MB');
-      return;
-    }
-
-    setUploading((prev) => ({ ...prev, cv: true }));
-    try {
-      const data = new FormData();
-      data.append('file', file);
-      const res = await api.post('/upload', data);
-      setForm((prev) => ({
-        ...prev,
-        personalInfo: { ...prev.personalInfo, cvFilename: res.data.filename },
-      }));
-    } catch {
-      alert('CV upload failed, please try again');
-    } finally {
-      setUploading((prev) => ({ ...prev, cv: false }));
-    }
-  };
-
-  // ─── Loading State ───
-  if (loading) return <p>Loading portfolio...</p>; //  no blank page
-
-  // ─── Render ───
-  return (
-    <div>
-      <h2>Portfolio Editor</h2>
-
-      {/* Autosave Status */}
-      {status === 'saving' && <p style={{ color: 'gray' }}>Saving...</p>}
-      {status === 'saved' && <p style={{ color: 'green' }}>Saved ✓</p>}
-      {status === 'error' && <p style={{ color: 'red' }}>Error saving, please check your connection</p>}
-
-      {/* Personal Info */}
-      <section>
-        <h3>Personal Info</h3>
-        <input name="fullName" placeholder="Full Name" value={form.personalInfo.fullName} onChange={handlePersonalInfo} />
-        <input name="title" placeholder="Title (e.g. Frontend Developer)" value={form.personalInfo.title} onChange={handlePersonalInfo} />
-        <textarea name="bio" placeholder="Bio" value={form.personalInfo.bio} onChange={handlePersonalInfo} />
-      </section>
-
-      {/* Photo Upload */}
-      <section>
-        <h3>Profile Photo</h3>
-        <input type="file" accept="image/*" onChange={handlePhotoUpload} disabled={uploading.photo} />
-        {uploading.photo && <p>Uploading photo...</p>}
-        {form.personalInfo.photo && (
-          <img src={form.personalInfo.photo} alt="profile preview" width={100} />
-        )}
-      </section>
-
-      {/* CV Upload */}
-      <section>
-        <h3>CV (PDF only, max 5MB)</h3>
-        <input type="file" accept=".pdf" onChange={handleCVUpload} disabled={uploading.cv} />
-        {uploading.cv && <p>Uploading CV...</p>}
-        {form.personalInfo.cvFilename && (
-          <p>CV uploaded: {form.personalInfo.cvFilename}</p>
-        )}
-      </section>
-
-      {/* Projects */}
-      <section>
-        <h3>Projects</h3>
-        {form.projects.map((project, index) => (
-          <div key={index}>
-            <input name="title" placeholder="Project Title" value={project.title} onChange={(e) => handleProjectChange(index, e)} />
-            <input name="description" placeholder="Description" value={project.description} onChange={(e) => handleProjectChange(index, e)} />
-            <button onClick={() => handleRemoveProject(index)}>Remove</button>
-          </div>
-        ))}
-        <button onClick={handleAddProject}>+ Add Project</button>
-      </section>
-
-      {/* Skills */}
-      <section>
-        <h3>Skills</h3>
-        <input
-          placeholder="e.g. React, Node.js, CSS"
-          value={form.skills.join(', ')}
-          onChange={handleSkillsChange}
+  if (loading) {
+    return (
+      <div className="page-loading">
+        <div
+          className="spinner spinner-brand"
+          style={{ width: 36, height: 36, borderWidth: 3 }}
         />
-      </section>
+        <span>Loading your portfolio…</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="editor-page">
+      {/* ── Header ── */}
+      <div className="editor-header">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+            marginBottom: 24,
+          }}
+        >
+          <div>
+            <h1 className="editor-title">Portfolio editor</h1>
+            <p className="editor-subtitle">
+              Changes save automatically as you type.
+            </p>
+          </div>
+          <AutosaveBadge status={status} />
+        </div>
+        <ProgressBar form={form} />
+      </div>
+
+      {/* ── Upload error banner ── */}
+      {uploadError && (
+        <div className="msg msg-error" style={{ marginBottom: 20 }}>
+          <span className="msg-icon">⚠</span>
+          <span>{uploadError}</span>
+          <button
+            type="button"
+            onClick={() => setUploadError("")}
+            style={{
+              marginLeft: "auto",
+              background: "none",
+              border: "none",
+              color: "var(--error)",
+              cursor: "pointer",
+              fontSize: 18,
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* ── Sections ── */}
+      <PersonalInfoSection
+        personalInfo={form.personalInfo}
+        onChange={handlePersonalInfo}
+      />
+
+      <PhotoUploadSection
+        photo={form.personalInfo.photo}
+        uploading={uploading.photo}
+        onUploadStart={handlePhotoUploadStart}
+        onUploadDone={handlePhotoUploadDone}
+        onUploadError={handlePhotoUploadError}
+      />
+
+      <CVUploadSection
+        cvFilename={form.personalInfo.cvFilename}
+        uploading={uploading.cv}
+        onUploadStart={handleCVUploadStart}
+        onUploadDone={handleCVUploadDone}
+        onUploadError={handleCVUploadError}
+      />
+
+      <ProjectsSection
+        projects={form.projects}
+        onAdd={handleAddProject}
+        onChange={handleProjectChange}
+        onRemove={handleRemoveProject}
+      />
+
+      <SkillsSection skills={form.skills} onChange={handleSkillsChange} />
+
+      {/* ── Bottom error ── */}
+      {status === "error" && (
+        <div className="msg msg-error" style={{ marginTop: 12 }}>
+          <span className="msg-icon">⚠</span>
+          <span>
+            Auto-save failed. Check your connection — changes will retry
+            automatically.
+          </span>
+        </div>
+      )}
     </div>
   );
 }
