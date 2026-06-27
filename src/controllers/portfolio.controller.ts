@@ -249,13 +249,19 @@ export const getPortfolioBySlug = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const downloadCv = async (req: Request, res: Response): Promise<void> => {
+export const downloadCv = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    const userId = req.userId!;
     const { id } = req.params;
     const portfolio = await prisma.portfolio.findUnique({ where: { id: id as string } });
 
     if (!portfolio) {
       res.status(404).json({ message: 'Portfolio not found.' });
+      return;
+    }
+
+    if (portfolio.userId !== userId) {
+      res.status(403).json({ message: 'Forbidden.' });
       return;
     }
 
