@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { generateSlug } from '../utils/slug';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { verifyToken } from '../utils/jwt';
+import path from 'path';
+import fs from 'fs';
 
 export const createPortfolio = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -13,9 +16,18 @@ export const createPortfolio = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ message: 'User not found.' });
+      return;
+    }
+
+    const slug = await generateSlug(user.name);
+
     const portfolio = await prisma.portfolio.create({
       data: {
         userId,
+        slug,
       },
     });
 
@@ -108,7 +120,7 @@ export const publishPortfolio = async (req: AuthenticatedRequest, res: Response)
 
     let slug = portfolio.slug;
     if (!slug) {
-      slug = await generateSlug((portfolio as any).user.name);
+      slug = await generateSlug(portfolio.user.name);
     }
 
     const updatedPortfolio = await prisma.portfolio.update({
@@ -200,12 +212,9 @@ export const getPortfolioBySlug = async (req: Request, res: Response): Promise<v
     let userId: string | undefined;
     
     if (token) {
-      try {
-        const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_jwt_key') as { userId: string };
+      const decoded = verifyToken(token);
+      if (decoded) {
         userId = decoded.userId;
-      } catch (e) {
-        // invalid token, ignore
       }
     }
 
@@ -271,9 +280,6 @@ export const downloadCv = async (req: AuthenticatedRequest, res: Response): Prom
       res.status(404).json({ message: 'CV not found for this portfolio.' });
       return;
     }
-
-    const path = require('path');
-    const fs = require('fs');
     const uploadDir = process.env.UPLOAD_DIR || 'uploads';
     const filePath = path.join(process.cwd(), uploadDir, personalInfo.cvFilename);
 

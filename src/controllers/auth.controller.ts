@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { sendResetPasswordEmail } from '../utils/email';
+import { signToken } from '../utils/jwt';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -33,7 +32,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       },
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as any });
+    const token = signToken(user.id, JWT_EXPIRES_IN);
 
     res.cookie('accessToken', token, {
       httpOnly: true,
@@ -74,7 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as any });
+    const token = signToken(user.id, JWT_EXPIRES_IN);
 
     res.cookie('accessToken', token, {
       httpOnly: true,

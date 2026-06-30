@@ -22,11 +22,11 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
+    cb(new Error('Invalid file type. Only JPG, PNG, WEBP, and PDF are allowed.'));
   }
 };
 
@@ -45,7 +45,7 @@ export const handleUpload = (req: Request, res: Response): void => {
       return;
     }
 
-    const fileUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/uploads/${req.file.filename}`;
+    const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/uploads/${req.file.filename}`;
 
     res.status(200).json({
       message: 'File uploaded successfully',

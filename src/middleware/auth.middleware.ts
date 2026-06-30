@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '../utils/jwt';
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
@@ -14,7 +14,11 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
       return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_jwt_key') as { userId: string };
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      res.status(401).json({ message: 'Invalid or expired token.' });
+      return;
+    }
     
     req.userId = decoded.userId;
     next();

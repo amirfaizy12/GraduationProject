@@ -3,17 +3,24 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const requiredEnvVars = ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USER', 'MAIL_PASS', 'FRONTEND_URL'];
+for (const key of requiredEnvVars) {
+  if (!process.env[key]) {
+    throw new Error(`${key} is not set in environment variables.`);
+  }
+}
+
 const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
-  port: parseInt(process.env.MAIL_PORT || '2525', 10),
+  host: process.env.MAIL_HOST,
+  port: parseInt(process.env.MAIL_PORT as string, 10),
   auth: {
-    user: process.env.MAIL_USER || '',
-    pass: process.env.MAIL_PASS || '',
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
   },
 });
 
 export const sendResetPasswordEmail = async (to: string, token: string) => {
-  const resetLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   
   await transporter.sendMail({
     from: '"PortfolioBuilder" <noreply@portfoliobuilder.com>',

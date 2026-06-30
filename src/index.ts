@@ -15,13 +15,20 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(helmet({ crossOriginResourcePolicy: false })); // allows loading images from the same origin
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
+
+// Split the comma-separated string into an array, or fallback to default URLs
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',')
+  : ['http://localhost:5173', 'https://portfolio-web-app-frontend-6s57.vercel.app'];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser());  
 
 // Static uploads folder
 const uploadDir = process.env.UPLOAD_DIR || 'uploads';
