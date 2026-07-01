@@ -23,7 +23,7 @@ function App() {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <div>Dashboard - Coming Soon</div>
+              <PortfolioEditor />
             </PrivateRoute>
           }
         />

@@ -25,7 +25,7 @@ export default function Login() {
         email: form.email.toLowerCase().trim(),
         password: form.password,
       });
-      setUser(res.data.user);
+      setUser(res.data);
       navigate("/dashboard");
     } catch (err) {
       // Same message for both wrong email and wrong password (security best practice)
