@@ -56,9 +56,12 @@ export default function Register() {
 
       navigate("/dashboard");
     } catch (err) {
+      console.log("REGISTER ERROR:", err.response?.data || err.message);
+    
       setError(
         err.response?.data?.message ||
-          "Something went wrong. Please try again.",
+          err.response?.data?.error ||
+          "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
