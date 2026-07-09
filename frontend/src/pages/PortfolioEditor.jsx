@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import PersonalInfoSection from "../components/editor/PersonalInfoSection";
 import PhotoUploadSection from "../components/editor/PhotoUploadSection";
@@ -52,11 +53,14 @@ function ProgressBar({ form }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function PortfolioEditor() {
   const [portfolioId, setPortfolioId] = useState(null);
+  const [slug, setSlug] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploading, setUploading] = useState({ photo: false, cv: false });
+
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     personalInfo: {
@@ -77,9 +81,11 @@ export default function PortfolioEditor() {
         const res = await api.get("/portfolio/mine");
         setForm(res.data);
         setPortfolioId(res.data.id);
+        setSlug(res.data.slug || "");
       } catch {
         const res = await api.post("/portfolio");
         setPortfolioId(res.data.id);
+        setSlug(res.data.slug || "");
       } finally {
         setLoading(false);
         setIsLoaded(true);
@@ -253,6 +259,24 @@ export default function PortfolioEditor() {
       />
 
       <SkillsSection skills={form.skills} onChange={handleSkillsChange} />
+
+      {/* ── View My Portfolio Button ── */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: 24,
+          marginBottom: 8,
+        }}
+      >
+        <button
+          className="btn btn-primary"
+          style={{ width: "200px", justifyContent: "center" }}
+          onClick={() => navigate("/dashboard")}
+        >
+          🚀 View My Portfolio
+        </button>
+      </div>
 
       {/* ── Bottom error ── */}
       {status === "error" && (

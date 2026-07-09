@@ -125,32 +125,26 @@ export default function PublicPortfolio() {
 
         {info.cvFilename && (
           <div style={{ textAlign: "center", marginTop: 22 }}>
- {/* API VERSION — رجعي ده لما API يشتغل */}
-{/* 
-<a
-  href={`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/portfolio/${portfolio.id}/cv`}
-  download
-  className="btn btn-primary"
-  style={{
-    width: "170px",
-    justifyContent: "center",
-  }}
->
-  Download CV
-</a> 
-*/}
+            {/* API VERSION — رجعي ده لما API يشتغل */}
+            {/*
+            <a
+              href={`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/portfolio/${portfolio.id}/cv`}
+              download
+              className="btn btn-primary"
+              style={{ width: "170px", justifyContent: "center" }}
+            >
+              Download CV
+            </a>
+            */}
 
             {/* MOCK VERSION */}
             <a
-  href="#"
-  className="btn btn-primary"
-  style={{
-    width: "170px",
-    justifyContent: "center",
-  }}
->
-  Download CV
-</a>
+              href="#"
+              className="btn btn-primary"
+              style={{ width: "170px", justifyContent: "center" }}
+            >
+              Download CV
+            </a>
           </div>
         )}
       </div>
