@@ -16,67 +16,68 @@ export default function PublicPortfolio() {
   const [error, setError] = useState("");
 
   // API VERSION — رجعي ده لما API يشتغل
-  // useEffect(() => {
-  //   const loadPortfolio = async () => {
-  //     try {
-  //       const res = await api.get(`/portfolio/slug/${slug}`);
-  //       setPortfolio(res.data);
-  //     } catch (err) {
-  //       if (err.response?.status === 404) {
-  //         setNotFound(true);
-  //       } else {
-  //         setError("Failed to load portfolio.");
-  //       }
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //
-  //   loadPortfolio();
-  // }, [slug]);
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      try {
+        const res = await api.get(`/portfolio/slug/${slug}`);
+        setPortfolio(res.data);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          setError("Failed to load portfolio.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    loadPortfolio();
+  }, [slug]);
 
   // MOCK VERSION — مؤقت للتصميم فقط
-  useEffect(() => {
-    if (slug !== "maivel-ashraf") {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
+  // useEffect(() => {
+  //   if (slug !== "maivel-ashraf") {
+  //     setNotFound(true);
+  //     setLoading(false);
+  //     return;
+  //   }
 
-    setPortfolio({
-      id: "mock-portfolio-id",
-      slug: "maivel-ashraf",
-      isPublic: true,
-      publicUrl: "http://localhost:5173/maivel-ashraf",
-      personalInfo: {
-        fullName: "Maivel Ashraf",
-        title: "Frontend Developer",
-        bio: "I build clean, responsive web applications using React, JavaScript, and modern UI practices.",
-        photo: "",
-        cvFilename: "maivel-cv.pdf",
-        email: "maivel@example.com",
-        github: "https://github.com",
-        linkedin: "https://linkedin.com",
-      },
-      projects: [
-        {
-          title: "Restaurant Website",
-          description:
-            "A responsive restaurant website with modern UI, menu sections, and smooth navigation.",
-          tags: ["React", "CSS", "JavaScript"],
-        },
-        {
-          title: "Safari Website",
-          description:
-            "A travel landing page that showcases safari trips, destinations, and booking information.",
-          tags: ["HTML", "CSS", "JavaScript"],
-        },
-      ],
-      skills: ["React", "JavaScript", "CSS", "Bootstrap", "Git", "Figma"],
-    });
+  //   setPortfolio({
+  //     id: "mock-portfolio-id",
+  //     slug: "maivel-ashraf",
+  //     isPublic: true,
+  //     publicUrl: "http://localhost:5173/maivel-ashraf",
+  //     personalInfo: {
+  //       fullName: "Maivel Ashraf",
+  //       title: "Frontend Developer",
+  //       bio: "I build clean, responsive web applications using React, JavaScript, and modern UI practices.",
+  //       photo: "",
+  //       cvFilename: "maivel-cv.pdf",
+  //       email: "maivel@example.com",
+  //       github: "https://github.com",
+  //       linkedin: "https://linkedin.com",
+  //     },
+  //     projects: [
+  //       {
+  //         title: "Restaurant Website",
+  //         description:
+  //           "A responsive restaurant website with modern UI, menu sections, and smooth navigation.",
+  //         tags: ["React", "CSS", "JavaScript"],
+  //       },
+  //       {
+  //         title: "Safari Website",
+  //         description:
+  //           "A travel landing page that showcases safari trips, destinations, and booking information.",
+  //         tags: ["HTML", "CSS", "JavaScript"],
+  //       },
+  //     ],
+  //     skills: ["React", "JavaScript", "CSS", "Bootstrap", "Git", "Figma"],
+  //   });
 
-    setLoading(false);
-  }, [slug]);
+  //   setLoading(false);
+  // }, [slug]);
+
 
   if (loading) {
     return (
@@ -126,7 +127,7 @@ export default function PublicPortfolio() {
         {info.cvFilename && (
           <div style={{ textAlign: "center", marginTop: 22 }}>
             {/* API VERSION — رجعي ده لما API يشتغل */}
-            {/*
+            
             <a
               href={`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/portfolio/${portfolio.id}/cv`}
               download
@@ -135,16 +136,16 @@ export default function PublicPortfolio() {
             >
               Download CV
             </a>
-            */}
+           
 
             {/* MOCK VERSION */}
-            <a
+            {/* <a
               href="#"
               className="btn btn-primary"
               style={{ width: "170px", justifyContent: "center" }}
             >
               Download CV
-            </a>
+            </a> */}
           </div>
         )}
       </div>

@@ -54,7 +54,7 @@ export default function Register() {
       });
       setUser(res.data);
 
-      navigate("/dashboard");
+      navigate("/portfolio/edit");
     } catch (err) {
       console.log("REGISTER ERROR:", err.response?.data || err.message);
     

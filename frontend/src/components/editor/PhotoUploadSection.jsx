@@ -29,14 +29,21 @@ export default function PhotoUploadSection({
     try {
       const data = new FormData();
       data.append("file", file);
+    
       const res = await api.post("/upload", data);
-      onUploadDone(res.data.url); // store URL in personalInfo.photo
-    } catch {
+    
+      console.log(res.data);
+    
+      const imageUrl = res.data.url.startsWith("http")
+        ? res.data.url
+        : `http://localhost:3000${res.data.url}`;
+    
+      onUploadDone(imageUrl);
+    } catch (err) {
+      console.log(err);
       onUploadError("Upload failed — please try again.");
     }
-    // Clear the input so re-selecting the same file fires again
-    e.target.value = "";
-  };
+  }
 
   return (
     <div className="editor-section">

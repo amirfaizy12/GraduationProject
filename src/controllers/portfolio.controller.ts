@@ -3,26 +3,58 @@ import prisma from '../lib/prisma';
 import { generateSlug } from '../utils/slug';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-export const createPortfolio = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const createPortfolio = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const userId = req.userId!;
 
-    const existingPortfolio = await prisma.portfolio.findUnique({ where: { userId } });
+    // لو المستخدم عنده Portfolio بالفعل رجّعه بدل إنشاء واحد جديد
+    const existingPortfolio = await prisma.portfolio.findUnique({
+      where: { userId },
+    });
+
     if (existingPortfolio) {
-      res.status(400).json({ message: 'Portfolio already exists for this user.' });
+      res.status(200).json(existingPortfolio);
       return;
     }
 
+    // MongoDB unique index لا يسمح بتكرار null في slug،
+    // لذلك ننشئ slug مؤقتًا وفريدًا لكل مستخدم
     const portfolio = await prisma.portfolio.create({
       data: {
         userId,
+        slug: `draft-${userId}`,
       },
     });
 
     res.status(201).json(portfolio);
   } catch (error) {
-    console.error('Create portfolio error:', error);
-    res.status(500).json({ message: 'Internal server error.' });
+    console.error("Create portfolio error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+export const getMyPortfolio = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.userId!;
+
+    const portfolio = await prisma.portfolio.findUnique({
+      where: { userId },
+    });
+
+    if (!portfolio) {
+      res.status(404).json({ message: "Portfolio not found." });
+      return;
+    }
+
+    res.status(200).json(portfolio);
+  } catch (error) {
+    console.error("Get my portfolio error:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -49,6 +81,7 @@ export const getPortfolio = async (req: AuthenticatedRequest, res: Response): Pr
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
 
 export const updatePortfolio = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -107,9 +140,10 @@ export const publishPortfolio = async (req: AuthenticatedRequest, res: Response)
     }
 
     let slug = portfolio.slug;
-    if (!slug) {
-      slug = await generateSlug((portfolio as any).user.name);
-    }
+
+if (!slug || slug.startsWith("draft-")) {
+  slug = await generateSlug(portfolio.user.name);
+}
 
     const updatedPortfolio = await prisma.portfolio.update({
       where: { id: id as string },

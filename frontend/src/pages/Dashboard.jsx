@@ -51,45 +51,46 @@ export default function Dashboard() {
 
   const publicUrl = portfolio?.publicUrl || portfolio?.shareableLink || "";
 
-  // API VERSION — رجعي ده لما MongoDB URL يشتغل
-  // useEffect(() => {
-  //   const loadPortfolio = async () => {
-  //     try {
-  //       const res = await api.get("/portfolio/mine");
-  //       setPortfolio(res.data);
-  //     } catch {
-  //       setError("Failed to load your portfolio.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   loadPortfolio();
-  // }, []);
+ // API VERSION
+useEffect(() => {
+  const loadPortfolio = async () => {
+    try {
+      const res = await api.get("/portfolio/mine");
+      setPortfolio(res.data);
+    } catch {
+      setError("Failed to load your portfolio.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // MOCK VERSION — مؤقت للتصميم
-  useEffect(() => {
-    setPortfolio({
-      id: "mock-portfolio-id",
-      slug: "maivel-ashraf",
-      isPublic: true,
-      publicUrl: "http://localhost:5173/maivel-ashraf",
-      shareableLink: "http://localhost:5173/maivel-ashraf",
-      viewCount: 248,
-      updatedAt: new Date().toISOString(),
-      personalInfo: {
-        fullName: "Maivel Ashraf",
-        title: "Frontend Developer",
-        bio: "I build clean, responsive web applications using React, JavaScript, and modern UI practices.",
-        photo: "",
-      },
-      projects: [
-        { title: "Restaurant Website", tags: ["React", "CSS"] },
-        { title: "Safari Website", tags: ["HTML", "JavaScript"] },
-      ],
-      skills: ["React", "JavaScript", "CSS", "Bootstrap"],
-    });
-    setLoading(false);
-  }, []);
+  loadPortfolio();
+}, []);
+
+// MOCK VERSION — مؤقت للتصميم
+// useEffect(() => {
+//   setPortfolio({
+//     id: "mock-portfolio-id",
+//     slug: "maivel-ashraf",
+//     isPublic: true,
+//     publicUrl: "http://localhost:5173/maivel-ashraf",
+//     shareableLink: "http://localhost:5173/maivel-ashraf",
+//     viewCount: 248,
+//     updatedAt: new Date().toISOString(),
+//     personalInfo: {
+//       fullName: "Maivel Ashraf",
+//       title: "Frontend Developer",
+//       bio: "I build clean, responsive web applications using React, JavaScript, and modern UI practices.",
+//       photo: "",
+//     },
+//     projects: [
+//       { title: "Restaurant Website", tags: ["React", "CSS"] },
+//       { title: "Safari Website", tags: ["HTML", "JavaScript"] },
+//     ],
+//     skills: ["React", "JavaScript", "CSS", "Bootstrap"],
+//   });
+//   setLoading(false);
+// }, []);
 
   const clearMessages = () => {
     setError("");
@@ -97,110 +98,111 @@ export default function Dashboard() {
   };
 
   // API VERSION
-  // const handlePublish = async () => {
-  //   if (!portfolio?.id) return;
-  //   clearMessages();
-  //   setActionLoading("publish");
-  //   try {
-  //     const res = await api.post(`/portfolio/${portfolio.id}/publish`);
-  //     setPortfolio((prev) => ({
-  //       ...prev,
-  //       isPublic: true,
-  //       slug: res.data.slug || prev.slug,
-  //       publicUrl: res.data.publicUrl || prev.publicUrl || prev.shareableLink,
-  //       shareableLink: res.data.publicUrl || prev.shareableLink || prev.publicUrl,
-  //     }));
-  //     setSuccess("Portfolio published successfully.");
-  //   } catch {
-  //     setError("Failed to publish portfolio.");
-  //   } finally {
-  //     setActionLoading("");
-  //   }
-  // };
-
   const handlePublish = async () => {
+    if (!portfolio?.id) return;
     clearMessages();
     setActionLoading("publish");
-
-    setTimeout(() => {
+    try {
+      const res = await api.post(`/portfolio/${portfolio.id}/publish`);
       setPortfolio((prev) => ({
         ...prev,
         isPublic: true,
-        slug: prev.slug || "maivel-ashraf",
-        publicUrl: prev.publicUrl || "http://localhost:5173/maivel-ashraf",
-        shareableLink: prev.shareableLink || "http://localhost:5173/maivel-ashraf",
+        slug: res.data.slug || prev.slug,
+        publicUrl: res.data.publicUrl || prev.publicUrl || prev.shareableLink,
+        shareableLink: res.data.publicUrl || prev.shareableLink || prev.publicUrl,
       }));
       setSuccess("Portfolio published successfully.");
+    } catch {
+      setError("Failed to publish portfolio.");
+    } finally {
       setActionLoading("");
-    }, 500);
+    }
   };
 
-  // API VERSION
-  // const handleUnpublish = async () => {
-  //   if (!portfolio?.id) return;
-  //   const confirmed = window.confirm("Are you sure you want to unpublish your portfolio?");
-  //   if (!confirmed) return;
+//  MOCK VERSION
+  // const handlePublish = async () => {
   //   clearMessages();
-  //   setActionLoading("unpublish");
-  //   try {
-  //     await api.post(`/portfolio/${portfolio.id}/unpublish`);
-  //     setPortfolio((prev) => ({ ...prev, isPublic: false }));
-  //     setSuccess("Portfolio unpublished successfully.");
-  //   } catch {
-  //     setError("Failed to unpublish portfolio.");
-  //   } finally {
+  //   setActionLoading("publish");
+
+  //   setTimeout(() => {
+  //     setPortfolio((prev) => ({
+  //       ...prev,
+  //       isPublic: true,
+  //       slug: prev.slug || "maivel-ashraf",
+  //       publicUrl: prev.publicUrl || "http://localhost:5173/maivel-ashraf",
+  //       shareableLink: prev.shareableLink || "http://localhost:5173/maivel-ashraf",
+  //     }));
+  //     setSuccess("Portfolio published successfully.");
   //     setActionLoading("");
-  //   }
+  //   }, 500);
   // };
 
+  // API VERSION
   const handleUnpublish = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to unpublish your portfolio?"
-    );
+    if (!portfolio?.id) return;
+    const confirmed = window.confirm("Are you sure you want to unpublish your portfolio?");
     if (!confirmed) return;
-
     clearMessages();
     setActionLoading("unpublish");
-
-    setTimeout(() => {
+    try {
+      await api.post(`/portfolio/${portfolio.id}/unpublish`);
       setPortfolio((prev) => ({ ...prev, isPublic: false }));
       setSuccess("Portfolio unpublished successfully.");
+    } catch {
+      setError("Failed to unpublish portfolio.");
+    } finally {
       setActionLoading("");
-    }, 500);
+    }
   };
-
-  // API VERSION
-  // const handleDelete = async () => {
-  //   if (!portfolio?.id) return;
-  //   const confirmed = window.confirm("Delete this portfolio? This action cannot be undone.");
+// mock
+  // const handleUnpublish = async () => {
+  //   const confirmed = window.confirm(
+  //     "Are you sure you want to unpublish your portfolio?"
+  //   );
   //   if (!confirmed) return;
+
   //   clearMessages();
-  //   setActionLoading("delete");
-  //   try {
-  //     await api.delete(`/portfolio/${portfolio.id}`);
-  //     setPortfolio(null);
-  //   } catch {
-  //     setError("Failed to delete portfolio.");
-  //   } finally {
+  //   setActionLoading("unpublish");
+
+  //   setTimeout(() => {
+  //     setPortfolio((prev) => ({ ...prev, isPublic: false }));
+  //     setSuccess("Portfolio unpublished successfully.");
   //     setActionLoading("");
-  //   }
+  //   }, 500);
   // };
 
+  // API VERSION
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Delete this portfolio? This action cannot be undone."
-    );
+    if (!portfolio?.id) return;
+    const confirmed = window.confirm("Delete this portfolio? This action cannot be undone.");
     if (!confirmed) return;
-
     clearMessages();
     setActionLoading("delete");
-
-    setTimeout(() => {
+    try {
+      await api.delete(`/portfolio/${portfolio.id}`);
       setPortfolio(null);
-      setSuccess("Portfolio deleted.");
+    } catch {
+      setError("Failed to delete portfolio.");
+    } finally {
       setActionLoading("");
-    }, 500);
+    }
   };
+// mock
+  // const handleDelete = async () => {
+  //   const confirmed = window.confirm(
+  //     "Delete this portfolio? This action cannot be undone."
+  //   );
+  //   if (!confirmed) return;
+
+  //   clearMessages();
+  //   setActionLoading("delete");
+
+  //   setTimeout(() => {
+  //     setPortfolio(null);
+  //     setSuccess("Portfolio deleted.");
+  //     setActionLoading("");
+  //   }, 500);
+  // };
 
   const handleCopyLink = async () => {
     if (!publicUrl) return;

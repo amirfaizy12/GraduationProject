@@ -168,7 +168,19 @@ export default function PortfolioEditor() {
     setUploading((p) => ({ ...p, cv: false }));
     setUploadError(msg);
   };
-
+  const handleViewDashboard = async () => {
+    if (!portfolioId) return;
+  
+    setStatus("saving");
+  
+    try {
+      await api.put(`/portfolio/${portfolioId}`, form);
+      setStatus("saved");
+      navigate("/dashboard");
+    } catch {
+      setStatus("error");
+    }
+  };
   if (loading) {
     return (
       <div className="page-loading">
@@ -270,12 +282,13 @@ export default function PortfolioEditor() {
         }}
       >
         <button
-          className="btn btn-primary"
-          style={{ width: "200px", justifyContent: "center" }}
-          onClick={() => navigate("/dashboard")}
-        >
-          🚀 View My Portfolio
-        </button>
+  className="btn btn-primary"
+  style={{ width: "200px", justifyContent: "center" }}
+  onClick={handleViewDashboard}
+  disabled={status === "saving"}
+>
+  {status === "saving" ? "Saving..." : "🚀 View My Portfolio"}
+</button>
       </div>
 
       {/* ── Bottom error ── */}
