@@ -1,0 +1,34 @@
+import { Router } from "express";
+import {
+  createPortfolio,
+  getMyPortfolio,
+  getPortfolio,
+  updatePortfolio,
+  publishPortfolio,
+  unpublishPortfolio,
+  deletePortfolio,
+  getPortfolioBySlug,
+  downloadCv,
+} from "../controllers/portfolio.controller";
+import { authMiddleware } from "../middleware/auth.middleware";
+
+const router = Router();
+
+// Public route for slug lookup
+router.get("/slug/:slug", getPortfolioBySlug);
+
+// Public route for downloading CV
+router.get("/:id/cv", downloadCv);
+
+// All other routes require auth
+router.use(authMiddleware);
+
+router.get("/mine", getMyPortfolio);
+router.post("/", createPortfolio);
+router.get("/:id", getPortfolio);
+router.put("/:id", updatePortfolio);
+router.post("/:id/publish", publishPortfolio);
+router.post("/:id/unpublish", unpublishPortfolio);
+router.delete("/:id", deletePortfolio);
+
+export default router;
