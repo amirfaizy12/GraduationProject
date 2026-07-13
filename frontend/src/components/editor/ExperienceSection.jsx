@@ -1,4 +1,4 @@
-import { Clock, PlusCircle } from "lucide-react";
+import { Clock, PlusCircle, Wand2 } from "lucide-react";
 
 export default function ExperienceSection({ experience, onAdd, onChange, onRemove }) {
   return (
@@ -99,6 +99,57 @@ export default function ExperienceSection({ experience, onAdd, onChange, onRemov
               onChange={(e) => onChange(index, e)}
               rows={3}
             />
+            <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 12 }}>
+              <button
+                type="button"
+                style={{ 
+                  fontSize: 13, 
+                  padding: "6px 14px", 
+                  borderRadius: 99, 
+                  background: "linear-gradient(135deg, rgba(124, 92, 255, 0.1), rgba(192, 132, 252, 0.1))",
+                  color: "#c084fc",
+                  border: "1px solid rgba(192, 132, 252, 0.2)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontWeight: 600,
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(124, 92, 255, 0.1)"
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(124, 92, 255, 0.2), rgba(192, 132, 252, 0.2))";
+                  e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.4)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(124, 92, 255, 0.2)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(124, 92, 255, 0.1), rgba(192, 132, 252, 0.1))";
+                  e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.2)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(124, 92, 255, 0.1)";
+                }}
+                onClick={(e) => {
+                  e.currentTarget.style.transform = "scale(0.95)";
+                  setTimeout(() => {
+                    if (e.target) e.target.style.transform = "translateY(0)";
+                  }, 150);
+
+                  const role = exp.title || "team member";
+                  const comp = exp.company || "the company";
+                  const templates = [
+                    `Spearheaded key initiatives as a ${role} at ${comp}, driving significant improvements in performance and user satisfaction. Collaborated cross-functionally to deliver high-impact projects on time.`,
+                    `Contributed to core product development at ${comp} as a ${role}. Focused on optimizing existing workflows, implementing new features, and ensuring best practices were maintained across the engineering team.`,
+                    `Served as a ${role} at ${comp}, where I took ownership of complex tasks and consistently delivered results. Mentored junior team members and participated actively in architectural discussions.`,
+                  ];
+                  const randomDesc = templates[Math.floor(Math.random() * templates.length)];
+                  onChange(index, { target: { name: "description", value: randomDesc } });
+                }}
+              >
+                <Wand2 size={14} />
+                Auto-write Description
+              </button>
+            </div>
           </div>
         </div>
       ))}

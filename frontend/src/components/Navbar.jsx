@@ -17,6 +17,7 @@ export default function Navbar() {
       // Proceed with client-side logout even if the request fails
     } finally {
       setUser(null);
+      setLoggingOut(false);
       navigate("/login");
     }
   };
@@ -33,8 +34,8 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to={user ? "/dashboard" : "/"} className="navbar-brand">
-        <div className="navbar-dot"><Sparkles size={16} /></div>
+      <Link to="/" className="navbar-brand">
+        <div className="navbar-dot"><Sparkles size={20} /></div>
         <span className="navbar-name">Portify</span>
       </Link>
 

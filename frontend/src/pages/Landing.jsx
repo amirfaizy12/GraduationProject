@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import laptopImg from "../assets/images/laptop.png";
+import { useAuth } from "../context/AuthContext";
 import { Edit3, Sparkles, CloudUpload, TrendingUp, Star, Zap, Diamond, Rocket, Check, ArrowRight, Play } from "lucide-react";
 
 export default function Landing() {
+  const { user } = useAuth();
+
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
@@ -119,7 +122,7 @@ export default function Landing() {
 
           <div style={{ display: "flex", gap: 16, marginTop: 30 }}>
             <Link
-              to="/register"
+              to={user ? "/dashboard" : "/register"}
               className="btn btn-primary"
               style={{ width: 230, justifyContent: "center" }}
             >
@@ -385,7 +388,7 @@ export default function Landing() {
         </div>
 
         <Link
-          to="/register"
+          to={user ? "/dashboard" : "/register"}
           className="btn btn-primary"
           style={{ width: 210, justifyContent: "center" }}
         >

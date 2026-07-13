@@ -1,72 +1,161 @@
+import { ExternalLink } from "lucide-react";
+
 export default function PublicProjectsSection({ projects = [] }) {
   if (!projects.length) return null;
 
   return (
-    <section id="projects" style={{ padding: "80px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>     
-      <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 40, color: "#fff" }}>Projects</h2>
+    <section id="projects" style={{ padding: "120px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>     
+      <style>
+        {`
+          .project-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+          }
+          .project-row:nth-child(even) .project-image-col {
+            order: 2;
+          }
+          .project-row:nth-child(even) .project-text-col {
+            order: 1;
+          }
+          
+          .project-image-wrap {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+            cursor: pointer;
+          }
+          .project-image-wrap:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(124, 92, 255, 0.2);
+            border-color: rgba(124, 92, 255, 0.3);
+          }
+          .project-image-wrap:hover img {
+            transform: scale(1.05) translateZ(0);
+          }
+          .project-image-wrap:hover .project-overlay {
+            opacity: 1;
+          }
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 24,
-        }}
-      >
+          @media (max-width: 800px) {
+            .project-row {
+              grid-template-columns: 1fr;
+              gap: 40px;
+            }
+            .project-row:nth-child(even) .project-image-col,
+            .project-row:nth-child(odd) .project-image-col {
+              order: 1 !important;
+            }
+            .project-row:nth-child(even) .project-text-col,
+            .project-row:nth-child(odd) .project-text-col {
+              order: 2 !important;
+            }
+          }
+        `}
+      </style>
+
+      <h2 style={{ fontSize: "clamp(36px, 6vw, 48px)", fontWeight: 900, marginBottom: 80, color: "#fff", letterSpacing: "-1.5px", textAlign: "center" }}>
+        Selected Work
+      </h2>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 120 }}>
         {projects.map((project, index) => (
-          <div
-            key={`${project.title}-${index}`}
-            className="public-project-card"
-            style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 16,
-              background: "rgba(255,255,255,.02)",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              cursor: "pointer"
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = "translateY(-6px)";
-              e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)";
-              e.currentTarget.style.borderColor = "rgba(124,92,255,0.3)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-            }}
-          >
-            {project.imageUrl ? (
-              <img 
-                src={project.imageUrl} 
-                alt={project.title} 
-                style={{ width: "100%", height: 200, objectFit: "cover", borderBottom: "1px solid rgba(255,255,255,0.05)" }} 
-              />
-            ) : (
-              <div style={{ width: "100%", height: 200, background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "grid", placeItems: "center" }}>
-                <span style={{ color: "rgba(255,255,255,0.2)" }}>No Image</span>
-              </div>
-            )}
+          <div key={`${project.title}-${index}`} className="project-row">
             
-            <div style={{ padding: 24, display: "flex", flexDirection: "column", flex: 1 }}>
-              <h3 style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 700, color: "#fff" }}>{project.title || "Untitled Project"}</h3>
+            {/* Image Column */}
+            <div className="project-image-col">
+              <div className="project-image-wrap">
+                {project.imageUrl ? (
+                  <img 
+                    src={project.imageUrl} 
+                    alt={project.title} 
+                    style={{ 
+                      width: "100%", 
+                      height: "100%", 
+                      objectFit: "cover", 
+                      transition: "transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                      willChange: "transform",
+                      transform: "translateZ(0)"
+                    }}
+                  />
+                ) : (
+                  <div style={{ 
+                    width: "100%", 
+                    height: "100%", 
+                    background: "linear-gradient(135deg, rgba(124,92,255,0.1), rgba(32,201,151,0.05))", 
+                    display: "grid", 
+                    placeItems: "center"
+                  }}>
+                    <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, letterSpacing: "2px" }}>NO IMAGE</span>
+                  </div>
+                )}
+                
+                {/* Hover Overlay */}
+                <div 
+                  className="project-overlay"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(5, 9, 20, 0.4)",
+                    backdropFilter: "blur(4px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0,
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  <div style={{ 
+                    width: 64, 
+                    height: 64, 
+                    borderRadius: "50%", 
+                    background: "rgba(255,255,255,0.1)", 
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center",
+                    color: "#fff"
+                  }}>
+                    <ExternalLink size={24} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Text Column */}
+            <div className="project-text-col">
+              <h3 style={{ margin: "0 0 20px", fontSize: "clamp(28px, 4vw, 36px)", fontWeight: 800, color: "#fff", letterSpacing: "-1px" }}>
+                {project.title || "Untitled Project"}
+              </h3>
   
-              <p style={{ margin: "0 0 20px", color: "var(--text-muted)", lineHeight: 1.6, flex: 1, fontSize: 15 }}>
+              <p style={{ 
+                margin: "0 0 32px", 
+                color: "rgba(255,255,255,0.7)", 
+                lineHeight: 1.8, 
+                fontSize: 18,
+                fontWeight: 400
+              }}>
                 {project.description || "No description added yet."}
               </p>
   
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: "auto" }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 {project.tags?.map((tag) => (
                   <span
                     key={tag}
                     style={{
-                      fontSize: 13,
-                      padding: "6px 12px",
+                      fontSize: 14,
+                      padding: "8px 16px",
                       borderRadius: 999,
-                      background: "rgba(124,92,255,0.15)",
-                      color: "#9b7cff",
-                      fontWeight: 500
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#e2e8f0",
+                      fontWeight: 500,
+                      letterSpacing: "0.5px"
                     }}
                   >
                     {tag}
@@ -74,6 +163,7 @@ export default function PublicProjectsSection({ projects = [] }) {
                 ))}
               </div>
             </div>
+
           </div>
         ))}
       </div>

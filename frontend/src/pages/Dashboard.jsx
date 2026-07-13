@@ -52,7 +52,8 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const publicUrl = portfolio?.publicUrl || portfolio?.shareableLink || "";
+  const baseUrl = window.location.origin;
+  const publicUrl = portfolio?.slug ? `${baseUrl}/${portfolio.slug}` : "";
 
  // API VERSION
 useEffect(() => {

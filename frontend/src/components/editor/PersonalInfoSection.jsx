@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import { User, Wand2 } from "lucide-react";
 
 /**
  * PersonalInfoSection
@@ -62,11 +62,65 @@ export default function PersonalInfoSection({ personalInfo, onChange }) {
           maxLength={500}
           rows={4}
         />
-        <div className="char-counter">
-          <span style={{ color: bioLen > 450 ? "var(--warning)" : undefined }}>
-            {bioLen}
-          </span>{" "}
-          / 500
+        
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+          <button
+            type="button"
+            style={{ 
+              fontSize: 13, 
+              padding: "6px 14px", 
+              borderRadius: 99, 
+              background: "linear-gradient(135deg, rgba(124, 92, 255, 0.1), rgba(192, 132, 252, 0.1))",
+              color: "#c084fc",
+              border: "1px solid rgba(192, 132, 252, 0.2)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: 600,
+              transition: "all 0.2s ease",
+              boxShadow: "0 2px 8px rgba(124, 92, 255, 0.1)"
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(124, 92, 255, 0.2), rgba(192, 132, 252, 0.2))";
+              e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.4)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(124, 92, 255, 0.2)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(124, 92, 255, 0.1), rgba(192, 132, 252, 0.1))";
+              e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.2)";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 2px 8px rgba(124, 92, 255, 0.1)";
+            }}
+            onClick={(e) => {
+              // Add a quick click animation
+              e.currentTarget.style.transform = "scale(0.95)";
+              setTimeout(() => {
+                if (e.target) e.target.style.transform = "translateY(0)";
+              }, 150);
+
+              const name = personalInfo.fullName || "A passionate professional";
+              const title = personalInfo.title || "developer";
+              const templates = [
+                `Hello! I'm ${name}, a dedicated ${title} with a strong passion for building innovative and user-friendly digital experiences. I thrive on solving complex problems and turning creative ideas into reality.`,
+                `I am a results-driven ${title} focused on delivering high-quality solutions. My name is ${name}, and I specialize in crafting elegant, scalable, and efficient products that make an impact.`,
+                `Welcome! I'm ${name}, an experienced ${title}. I love bridging the gap between design and technology, continuously learning new skills, and collaborating with others to create meaningful projects.`,
+              ];
+              const randomBio = templates[Math.floor(Math.random() * templates.length)];
+              onChange({ target: { name: "bio", value: randomBio } });
+            }}
+          >
+            <Wand2 size={14} />
+            Auto-write Bio
+          </button>
+
+          <div className="char-counter" style={{ marginTop: 0 }}>
+            <span style={{ color: bioLen > 450 ? "var(--warning)" : undefined }}>
+              {bioLen}
+            </span>{" "}
+            / 500
+          </div>
         </div>
       </div>
 
